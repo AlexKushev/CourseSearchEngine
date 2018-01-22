@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-public class LoginController {
+public class SearchController {
 
     @RequestMapping("/search")
     public String search(@RequestParam("searchQuery") String searchQuery, 
             Model model) {
 
         System.out.println(searchQuery);
-
+        model.addAttribute("searchedQuery", searchQuery);
         return "search-result";
     }
 

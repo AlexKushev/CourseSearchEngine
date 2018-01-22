@@ -11,7 +11,7 @@
 	
 	<form:form action="${pageContext.request.contextPath}/search"  method="GET">
 	
-		Search:  <input type="text" name="searchQuery" />
+		Search: <input type="text" name="searchQuery" />
 		
 		<input type="submit" value="Search" />
 	

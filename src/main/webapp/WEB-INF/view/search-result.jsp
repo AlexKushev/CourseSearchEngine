@@ -9,6 +9,7 @@
 <body>
 
 	<h3>Search results are listed here:</h3>
+	${searchedQuery}
 	
 
 
