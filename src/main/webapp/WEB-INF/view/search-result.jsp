@@ -11,6 +11,10 @@
 	<h3>Search results are listed here:</h3>
 	${searchedQuery}
 	
+	<c:forEach items="${list}" var="t">
+		<p><c:out value="${t}"/></p>
+	</c:forEach>
+	
 
 
 </body>
