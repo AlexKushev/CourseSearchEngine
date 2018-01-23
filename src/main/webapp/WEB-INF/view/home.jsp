@@ -13,6 +13,8 @@
 	
 		Search: <input type="text" name="searchQuery" />
 		
+		<input type="checkbox" name="isFree" value="false" /> Free
+		
 		<input type="submit" value="Search" />
 	
 	</form:form>
