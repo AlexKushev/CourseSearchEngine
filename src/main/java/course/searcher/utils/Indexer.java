@@ -44,10 +44,6 @@ public class Indexer {
             Field title = new StoredField("fileName", f.getName());
             document.add(title);
 
-            Field location = new StoredField("location", f.getCanonicalPath());
-            System.out.println(f.getPath());
-            document.add(location);
-
             Field body = new TextField("body", new FileReader(f));
             document.add(body);
 

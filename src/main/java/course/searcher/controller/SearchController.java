@@ -1,6 +1,6 @@
 package course.searcher.controller;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +19,10 @@ public class SearchController {
     private SearchService searchService;
 
     @RequestMapping("/search")
-    public String search(@RequestParam("searchQuery") String searchQuery, Model model) {
+    public String search(@RequestParam("searchQuery") String searchQuery, Model model) throws IOException {
         model.addAttribute("searchedQuery", searchQuery);
 
-        List<Course> loadCoursesFromFiles = searchService.loadCoursesFromFiles(new ArrayList<String>());
+        List<Course> loadCoursesFromFiles = searchService.search(searchQuery);
 
         model.addAttribute("list", loadCoursesFromFiles);
         return "search-result";
