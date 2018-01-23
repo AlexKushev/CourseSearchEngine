@@ -5,18 +5,20 @@ public class Course {
     private String source;
     private String title;
     private String price;
+    private String author;
     private String length;
-    private String description;
-    private String link;
+    
+    public Course() {
+        
+    }
 
-    public Course(String source, String title, String price, String length, String description, String link) {
+    public Course(String source, String title, String price, String author, String length) {
         super();
         this.source = source;
         this.title = title;
         this.price = price;
+        this.author = author;
         this.length = length;
-        this.description = description;
-        this.link = link;
     }
 
     public String getSource() {
@@ -43,6 +45,14 @@ public class Course {
         this.price = price;
     }
 
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
     public String getLength() {
         return length;
     }
@@ -51,20 +61,11 @@ public class Course {
         this.length = length;
     }
 
-    public String getDescription() {
-        return description;
+    @Override
+    public String toString() {
+        return "Course [source=" + source + ", title=" + title + ", price=" + price + ", author=" + author + ", length="
+                + length + "]";
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
+  
 }

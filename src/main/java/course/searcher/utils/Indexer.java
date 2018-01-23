@@ -33,7 +33,7 @@ public class Indexer {
 
         IndexWriter indexWriter = new IndexWriter(directory, config);
 
-        File dirToBeIndexed = new File("DataToIndex");
+        File dirToBeIndexed = new File("src/main/resources/DataToIndex");
 
         File[] files = dirToBeIndexed.listFiles();
 
@@ -45,6 +45,7 @@ public class Indexer {
             document.add(title);
 
             Field location = new StoredField("location", f.getCanonicalPath());
+            System.out.println(f.getPath());
             document.add(location);
 
             Field body = new TextField("body", new FileReader(f));
