@@ -19,8 +19,19 @@ public class SearchController {
     private SearchService searchService;
 
     @RequestMapping("/search")
-    public String search(@RequestParam("searchQuery") String searchQuery, Model model) throws IOException {
+    public String search(@RequestParam("searchQuery") String searchQuery,
+            @RequestParam(value = "isFree", required = false) String isFree, 
+            @RequestParam("source") String source, Model model)
+            throws IOException {
         model.addAttribute("searchedQuery", searchQuery);
+        
+        System.out.println(source);
+
+        if (isFree == null) {
+            System.out.println("not checked");
+        } else {
+            System.out.println("checked");
+        }
 
         List<Course> loadCoursesFromFiles = searchService.search(searchQuery);
 
