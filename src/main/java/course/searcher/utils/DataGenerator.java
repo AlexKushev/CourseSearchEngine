@@ -1,5 +1,6 @@
 package course.searcher.utils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -47,6 +48,11 @@ public class DataGenerator {
         ratings.add("2");
 
         Random random = new Random();
+        
+        File file = new File("src/main/resources/DataToIndex");
+        for (File f : file.listFiles()) {
+            f.delete();
+        }
 
         for (int i = 1; i <= 10; i++) {
             String fileName = "course" + i + ".txt";
