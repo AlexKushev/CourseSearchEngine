@@ -13,10 +13,17 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.QueryBuilder;
@@ -27,10 +34,11 @@ import course.searcher.domain.Course;
 @Component
 public class SearchService {
 
-    public List<Course> search(String searchQuery) throws IOException {
-        
-        List<String> documentNames = new ArrayList<String>();
+    public List<Course> search(String searchQuery, String isFreeSelected, String source)
+            throws IOException, ParseException {
 
+        List<String> documentNames = new ArrayList<String>();
+        System.out.println(getClass().getResource("/IndexData") == null);
         File dirToStoreIndex = new File(getClass().getResource("/IndexData").getFile());
         Directory directory = FSDirectory.open(dirToStoreIndex.toPath());
 
@@ -39,13 +47,10 @@ public class SearchService {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
-        Analyzer analyzer = new StandardAnalyzer();
-        QueryBuilder queryBuilder = new QueryBuilder(analyzer);
-        
-        Query query = queryBuilder.createBooleanQuery("body", searchQuery);
-        
+        Query query = generateQuery(searchQuery, isFreeSelected, source);
+
         TopDocs topDocs = searcher.search(query, 10);
-        
+
         ScoreDoc[] hits = topDocs.scoreDocs;
         for (int i = 0; i < hits.length; i++) {
             int docId = hits[i].doc;
@@ -86,4 +91,21 @@ public class SearchService {
         return courses;
     }
 
+    private BooleanQuery generateQuery(String searchQuery, String isFree, String source) {
+        TermQuery searchQueryTerm = new TermQuery(new Term("body", searchQuery.toLowerCase()));
+
+        BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
+        booleanQuieryBuilder.add(new BooleanClause(searchQueryTerm, Occur.MUST));
+
+        if (isFree != null) {
+            TermQuery termQuery = new TermQuery(new Term("body", "free"));
+            booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
+        }
+        if (!source.toLowerCase().equals("all")) {
+            TermQuery termQuery = new TermQuery(new Term("body", source.toLowerCase()));
+            booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
+        }
+        return booleanQuieryBuilder.build();
+
+    }
 }
