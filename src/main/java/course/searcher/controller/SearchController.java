@@ -26,6 +26,7 @@ public class SearchController {
 
         List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source);
 
+        model.addAttribute("searchQuery", searchQuery);
         model.addAttribute("list", loadCoursesFromFiles);
         return "search-result";
     }

@@ -35,8 +35,8 @@ public class DataGenerator {
         authors.add("Author3");
 
         List<String> lengths = new ArrayList<String>();
-        lengths.add("4,5");
-        lengths.add("37,4");
+        lengths.add("4.5");
+        lengths.add("37.4");
         lengths.add("50");
         lengths.add("120");
 

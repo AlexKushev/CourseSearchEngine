@@ -5,13 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
@@ -19,8 +20,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-
-import course.searcher.domain.Course;
 
 public class Indexer {
 
@@ -46,14 +45,30 @@ public class Indexer {
 
         for (File f : files) {
             System.out.println("Indexing file " + f.getCanonicalPath());
+            Map<String, String> attributes = new HashMap<String, String>();
+
+            try (Stream<String> stream = Files.lines(Paths.get(dirToBeIndexed + "/" + f.getName()))) {
+
+                stream.forEach(item -> {
+                    attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Document document = new Document();
 
             Field title = new StoredField("fileName", f.getName());
             document.add(title);
-            
+
             Field body = new TextField("body", new FileReader(f));
             document.add(body);
 
+            System.out.println(attributes.get("length"));
+            Field courseLength = new DoublePoint("length", Double.valueOf(attributes.get("length")));
+            document.add(courseLength);
+            
             indexWriter.addDocument(document);
         }
 
