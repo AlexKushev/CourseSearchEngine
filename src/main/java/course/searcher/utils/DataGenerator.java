@@ -39,17 +39,24 @@ public class DataGenerator {
         lengths.add("37.4");
         lengths.add("50");
         lengths.add("120");
+        
+        List<String> ratings = new ArrayList<String>();
+        ratings.add("5");
+        ratings.add("2.3");
+        ratings.add("4.2");
+        ratings.add("2");
 
         Random random = new Random();
 
         for (int i = 1; i <= 10; i++) {
             String fileName = "course" + i + ".txt";
-            PrintWriter printWriter = new PrintWriter(fileName);
+            PrintWriter printWriter = new PrintWriter("src/main/resources/DataToIndex/" + fileName);
             printWriter.println("Source : " + providers.get(random.nextInt(providers.size())));
             printWriter.println("Title : " + titles.get(random.nextInt(titles.size())));
             printWriter.println("Price : " + prices.get(random.nextInt(prices.size())));
             printWriter.println("Author : " + authors.get(random.nextInt(authors.size())));
             printWriter.println("Length : " + lengths.get(random.nextInt(lengths.size())));
+            printWriter.println("Rating : " + ratings.get(random.nextInt(ratings.size())));
             printWriter.close();
         }
 

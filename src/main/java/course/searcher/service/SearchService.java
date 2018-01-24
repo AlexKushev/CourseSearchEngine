@@ -76,7 +76,7 @@ public class SearchService {
                 });
 
                 Course course = new Course(attributes.get(0), attributes.get(1), attributes.get(2), attributes.get(3),
-                        attributes.get(4));
+                        attributes.get(4), attributes.get(5));
                 courses.add(course);
 
             } catch (IOException e) {

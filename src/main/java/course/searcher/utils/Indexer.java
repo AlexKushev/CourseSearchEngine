@@ -44,34 +44,36 @@ public class Indexer {
         File[] files = dirToBeIndexed.listFiles();
 
         for (File f : files) {
-            System.out.println("Indexing file " + f.getCanonicalPath());
-            Map<String, String> attributes = new HashMap<String, String>();
+            if (!f.getName().contains("DS_Store")) {
+                System.out.println("Indexing file " + f.getCanonicalPath());
+                Map<String, String> attributes = new HashMap<String, String>();
 
-            try (Stream<String> stream = Files.lines(Paths.get(dirToBeIndexed + "/" + f.getName()))) {
+                try (Stream<String> stream = Files.lines(Paths.get(dirToBeIndexed + "/" + f.getName()))) {
 
-                stream.forEach(item -> {
-                    attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
-                });
+                    stream.forEach(item -> {
+                        attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
+                    });
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Document document = new Document();
+
+                Field title = new StoredField("fileName", f.getName());
+                document.add(title);
+
+                Field body = new TextField("body", new FileReader(f));
+                document.add(body);
+
+                if (attributes.get("price").toLowerCase().equals("free")) {
+                    attributes.put("price", "0.0");
+                }
+                Field price = new DoublePoint("price", Double.valueOf(attributes.get("price")));
+                document.add(price);
+
+                indexWriter.addDocument(document);
             }
-
-            Document document = new Document();
-
-            Field title = new StoredField("fileName", f.getName());
-            document.add(title);
-
-            Field body = new TextField("body", new FileReader(f));
-            document.add(body);
-
-            if (attributes.get("price").toLowerCase().equals("free")) {
-                attributes.put("price", "0.0");
-            }
-            Field price = new DoublePoint("price", Double.valueOf(attributes.get("price")));
-            document.add(price);
-
-            indexWriter.addDocument(document);
         }
 
         indexWriter.close();

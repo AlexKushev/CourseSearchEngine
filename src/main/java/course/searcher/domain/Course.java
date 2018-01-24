@@ -7,18 +7,20 @@ public class Course {
     private String price;
     private String author;
     private String length;
-    
+    private String rating;
+
     public Course() {
-        
+
     }
 
-    public Course(String source, String title, String price, String author, String length) {
+    public Course(String source, String title, String price, String author, String length, String rating) {
         super();
         this.source = source;
         this.title = title;
         this.price = price;
         this.author = author;
         this.length = length;
+        this.rating = rating;
     }
 
     public String getSource() {
@@ -61,11 +63,18 @@ public class Course {
         this.length = length;
     }
 
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+
     @Override
     public String toString() {
         return "Course [source=" + source + ", title=" + title + ", price=" + price + ", author=" + author + ", length="
                 + length + "]";
     }
 
-  
 }
