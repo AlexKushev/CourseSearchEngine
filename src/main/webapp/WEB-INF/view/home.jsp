@@ -17,7 +17,15 @@
 		<input type="checkbox" name="isFree" value="false" /> Free
 		<br />
 		
-		Max Price: <input type="text" name="maxPrice"/>
+        <!-- Hide when ifFree checkbox is checked -->
+        Price Range : 
+        <select name="priceRange">
+            <option value="0" selected>All Prices</option>
+            <option value="1">Max 49.99</option>
+            <option value="2">50 - 99.99</option>
+            <option value="3">Over 100</option>
+        </select>
+        
 		<br />
 		
 		Source:

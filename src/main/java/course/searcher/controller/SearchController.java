@@ -22,10 +22,9 @@ public class SearchController {
     @RequestMapping("/search")
     public String search(@RequestParam("searchQuery") String searchQuery,
             @RequestParam(value = "isFree", required = false) String isFree, @RequestParam("source") String source,
-            Model model) throws IOException, ParseException {
+            @RequestParam("priceRange") String priceRange, Model model) throws IOException, ParseException {
 
-        List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source);
-
+        List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source, priceRange);
         model.addAttribute("searchQuery", searchQuery);
         model.addAttribute("list", loadCoursesFromFiles);
         return "search-result";

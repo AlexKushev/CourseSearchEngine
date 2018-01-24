@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -30,7 +31,7 @@ import course.searcher.domain.Course;
 @Component
 public class SearchService {
 
-    public List<Course> search(String searchQuery, String isFreeSelected, String source)
+    public List<Course> search(String searchQuery, String isFreeSelected, String source, String priceRange)
             throws IOException, ParseException {
 
         List<String> documentNames = new ArrayList<String>();
@@ -43,7 +44,7 @@ public class SearchService {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
-        Query query = generateQuery(searchQuery, isFreeSelected, source);
+        Query query = generateQuery(searchQuery, isFreeSelected, source, priceRange);
 
         TopDocs topDocs = searcher.search(query, 10);
 
@@ -87,7 +88,7 @@ public class SearchService {
         return courses;
     }
 
-    private BooleanQuery generateQuery(String searchQuery, String isFree, String source) {
+    private BooleanQuery generateQuery(String searchQuery, String isFree, String source, String priceRange) {
         TermQuery searchQueryTerm = new TermQuery(new Term("body", searchQuery.toLowerCase()));
 
         BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
@@ -101,7 +102,28 @@ public class SearchService {
             TermQuery termQuery = new TermQuery(new Term("body", source.toLowerCase()));
             booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
         }
-        return booleanQuieryBuilder.build();
+        int priceRangeInt = Integer.valueOf(priceRange);
+        switch (priceRangeInt) {
+        case 0:
+            break;
+        case 1:
+            booleanQuieryBuilder.add(getDoublePointQuery(0.0, 49.9), Occur.MUST);
+            break;
+        case 2:
+            booleanQuieryBuilder.add(getDoublePointQuery(50.0, 99.9), Occur.MUST);
+            break;
+        case 3:
+            booleanQuieryBuilder.add(getDoublePointQuery(100.0, 9999.9), Occur.MUST);
+            break;
+        default:
+            break;
+        }
 
+        return booleanQuieryBuilder.build();
     }
+
+    private Query getDoublePointQuery(double lowerValue, double maxValue) {
+        return DoublePoint.newRangeQuery("price", lowerValue, maxValue);
+    }
+
 }

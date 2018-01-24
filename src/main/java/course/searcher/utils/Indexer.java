@@ -65,10 +65,12 @@ public class Indexer {
             Field body = new TextField("body", new FileReader(f));
             document.add(body);
 
-            System.out.println(attributes.get("length"));
-            Field courseLength = new DoublePoint("length", Double.valueOf(attributes.get("length")));
-            document.add(courseLength);
-            
+            if (attributes.get("price").toLowerCase().equals("free")) {
+                attributes.put("price", "0.0");
+            }
+            Field price = new DoublePoint("price", Double.valueOf(attributes.get("price")));
+            document.add(price);
+
             indexWriter.addDocument(document);
         }
 
