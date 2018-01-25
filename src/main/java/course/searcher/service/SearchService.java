@@ -36,8 +36,8 @@ import course.searcher.domain.Course;
 @Component
 public class SearchService {
 
-    public List<Course> search(String searchQuery, String isFreeSelected, String[] sources, String priceRange)
-            throws IOException, ParseException {
+    public List<Course> search(String searchQuery, String isFreeSelected, String[] sources, String priceRange,
+            String highRating) throws IOException, ParseException {
 
         List<String> documentNames = new ArrayList<String>();
         File dirToStoreIndex = new File(getClass().getResource("/IndexData").getFile());
@@ -47,7 +47,7 @@ public class SearchService {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
-        Query query = generateQuery(searchQuery, isFreeSelected, sources, priceRange);
+        Query query = generateQuery(searchQuery, isFreeSelected, sources, priceRange, highRating);
 
         TopDocs topDocs = searcher.search(query, 1000);
 
@@ -91,7 +91,8 @@ public class SearchService {
         return courses;
     }
 
-    private BooleanQuery generateQuery(String searchQuery, String isFree, String[] sources, String priceRange) {
+    private BooleanQuery generateQuery(String searchQuery, String isFree, String[] sources, String priceRange,
+            String highRating) {
         TermQuery searchQueryTerm = new TermQuery(new Term("body", searchQuery.toLowerCase()));
 
         BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
@@ -100,6 +101,10 @@ public class SearchService {
         if (isFree != null) {
             TermQuery termQuery = new TermQuery(new Term("body", "free"));
             booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
+        }
+        
+        if (highRating != null) {
+            booleanQuieryBuilder.add(getDoublePointQuery("rating", 4.0, 6), Occur.MUST);
         }
 
         Set<String> sourceSet = new HashSet<String>(Arrays.asList(sources));
@@ -112,13 +117,13 @@ public class SearchService {
         case 0:
             break;
         case 1:
-            booleanQuieryBuilder.add(getDoublePointQuery(0.0, 49.9), Occur.MUST);
+            booleanQuieryBuilder.add(getDoublePointQuery("price", 0.0, 49.9), Occur.MUST);
             break;
         case 2:
-            booleanQuieryBuilder.add(getDoublePointQuery(50.0, 99.9), Occur.MUST);
+            booleanQuieryBuilder.add(getDoublePointQuery("price", 50.0, 99.9), Occur.MUST);
             break;
         case 3:
-            booleanQuieryBuilder.add(getDoublePointQuery(100.0, 9999.9), Occur.MUST);
+            booleanQuieryBuilder.add(getDoublePointQuery("price", 100.0, 9999.9), Occur.MUST);
             break;
         default:
             break;
@@ -127,8 +132,8 @@ public class SearchService {
         return booleanQuieryBuilder.build();
     }
 
-    private Query getDoublePointQuery(double lowerValue, double maxValue) {
-        return DoublePoint.newRangeQuery("price", lowerValue, maxValue);
+    private Query getDoublePointQuery(String field, double lowerValue, double maxValue) {
+        return DoublePoint.newRangeQuery(field, lowerValue, maxValue);
     }
 
     private Query getSourceQuery(Set<String> sources) {

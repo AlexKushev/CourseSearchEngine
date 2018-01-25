@@ -38,6 +38,8 @@
 		</select>
 		
 		<br />
+        
+        Only over 4.0 rating <input type="checkbox" name="highRating" value="false" />
 	</form:form>
 	
 	

@@ -20,6 +20,7 @@
                     Price : <c:out value="${course.price}"/>
                     Author : <c:out value="${course.author}"/>
                     Length : <c:out value="${course.length}"/>
+                    Rating : <c:out value="${course.rating}"/>
                 </div>
             </c:forEach>
         </c:when>

@@ -22,9 +22,11 @@ public class SearchController {
     @RequestMapping("/search")
     public String search(@RequestParam("searchQuery") String searchQuery,
             @RequestParam(value = "isFree", required = false) String isFree, @RequestParam("source") String[] source,
-            @RequestParam("priceRange") String priceRange, Model model) throws IOException, ParseException {
+            @RequestParam("priceRange") String priceRange,
+            @RequestParam(value = "highRating", required = false) String highRating, Model model)
+            throws IOException, ParseException {
 
-        List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source, priceRange);
+        List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source, priceRange, highRating);
         model.addAttribute("searchQuery", searchQuery);
         model.addAttribute("list", loadCoursesFromFiles);
         return "search-result";
