@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.lucene.document.Document;
@@ -33,7 +36,7 @@ import course.searcher.domain.Course;
 @Component
 public class SearchService {
 
-    public List<Course> search(String searchQuery, String isFreeSelected, String source, String priceRange)
+    public List<Course> search(String searchQuery, String isFreeSelected, String[] sources, String priceRange)
             throws IOException, ParseException {
 
         List<String> documentNames = new ArrayList<String>();
@@ -44,7 +47,7 @@ public class SearchService {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
-        Query query = generateQuery(searchQuery, isFreeSelected, source, priceRange);
+        Query query = generateQuery(searchQuery, isFreeSelected, sources, priceRange);
 
         TopDocs topDocs = searcher.search(query, 1000);
 
@@ -88,7 +91,7 @@ public class SearchService {
         return courses;
     }
 
-    private BooleanQuery generateQuery(String searchQuery, String isFree, String source, String priceRange) {
+    private BooleanQuery generateQuery(String searchQuery, String isFree, String[] sources, String priceRange) {
         TermQuery searchQueryTerm = new TermQuery(new Term("body", searchQuery.toLowerCase()));
 
         BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
@@ -98,10 +101,12 @@ public class SearchService {
             TermQuery termQuery = new TermQuery(new Term("body", "free"));
             booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
         }
-        if (!source.toLowerCase().equals("all")) {
-            TermQuery termQuery = new TermQuery(new Term("body", source.toLowerCase()));
-            booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
+
+        Set<String> sourceSet = new HashSet<String>(Arrays.asList(sources));
+        if (!sourceSet.contains("All") && sourceSet.size() != 3) {
+            booleanQuieryBuilder.add(getSourceQuery(sourceSet), Occur.MUST);
         }
+
         int priceRangeInt = Integer.valueOf(priceRange);
         switch (priceRangeInt) {
         case 0:
@@ -124,6 +129,15 @@ public class SearchService {
 
     private Query getDoublePointQuery(double lowerValue, double maxValue) {
         return DoublePoint.newRangeQuery("price", lowerValue, maxValue);
+    }
+
+    private Query getSourceQuery(Set<String> sources) {
+        BooleanQuery.Builder sourceBooleanQueryBuilder = new BooleanQuery.Builder();
+        for (String source : sources) {
+            TermQuery sourceTermQuery = new TermQuery(new Term("source", source.toLowerCase()));
+            sourceBooleanQueryBuilder.add(new BooleanClause(sourceTermQuery, Occur.SHOULD));
+        }
+        return sourceBooleanQueryBuilder.build();
     }
 
 }

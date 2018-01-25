@@ -21,7 +21,7 @@ public class SearchController {
 
     @RequestMapping("/search")
     public String search(@RequestParam("searchQuery") String searchQuery,
-            @RequestParam(value = "isFree", required = false) String isFree, @RequestParam("source") String source,
+            @RequestParam(value = "isFree", required = false) String isFree, @RequestParam("source") String[] source,
             @RequestParam("priceRange") String priceRange, Model model) throws IOException, ParseException {
 
         List<Course> loadCoursesFromFiles = searchService.search(searchQuery, isFree, source, priceRange);

@@ -16,6 +16,7 @@ import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
@@ -64,6 +65,9 @@ public class Indexer {
 
                     Field title = new StoredField("fileName", f.getName());
                     document.add(title);
+                    
+                    Field source = new TextField("source", attributes.get("source"), Store.YES);
+                    document.add(source);
 
                     Field body = new TextField("body", new FileReader(f));
                     document.add(body);
