@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.lucene.document.Document;
@@ -35,24 +37,22 @@ public class SearchService {
             throws IOException, ParseException {
 
         List<String> documentNames = new ArrayList<String>();
-        System.out.println(getClass().getResource("/IndexData") == null);
         File dirToStoreIndex = new File(getClass().getResource("/IndexData").getFile());
         Directory directory = FSDirectory.open(dirToStoreIndex.toPath());
 
-        // start searching
         IndexReader indexReader = DirectoryReader.open(directory);
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
         Query query = generateQuery(searchQuery, isFreeSelected, source, priceRange);
 
-        TopDocs topDocs = searcher.search(query, 10);
+        TopDocs topDocs = searcher.search(query, 1000);
 
         ScoreDoc[] hits = topDocs.scoreDocs;
         for (int i = 0; i < hits.length; i++) {
             int docId = hits[i].doc;
-            Document d = searcher.doc(docId);
-            String fileName = d.get("fileName");
+            Document document = searcher.doc(docId);
+            String fileName = document.get("fileName");
             documentNames.add(fileName);
         }
 
@@ -67,16 +67,16 @@ public class SearchService {
 
         for (String document : documents) {
 
-            List<String> attributes = new ArrayList<String>();
+            Map<String, String> attributes = new HashMap<String, String>();
 
             try (Stream<String> stream = Files.lines(Paths.get(dataDirectory + "/" + document))) {
 
                 stream.forEach(item -> {
-                    attributes.add(item.split(":")[1].trim());
+                    attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
                 });
 
-                Course course = new Course(attributes.get(0), attributes.get(1), attributes.get(2), attributes.get(3),
-                        attributes.get(4), attributes.get(5));
+                Course course = new Course(attributes.get("source"), attributes.get("title"), attributes.get("price"),
+                        attributes.get("author"), attributes.get("length"), attributes.get("rating"));
                 courses.add(course);
 
             } catch (IOException e) {

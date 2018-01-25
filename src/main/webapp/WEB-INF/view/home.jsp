@@ -29,7 +29,7 @@
 		<br />
 		
 		Source:
-		<select name="source">
+		<select name="source" multiple="multiple">
 			<option value="All" selected>All</option>
 			<option value="Udemy">Udemy</option>
 			<option value="Coursera">Coursera</option>

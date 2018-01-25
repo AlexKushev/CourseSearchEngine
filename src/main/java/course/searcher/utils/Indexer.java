@@ -24,12 +24,9 @@ import org.apache.lucene.store.FSDirectory;
 public class Indexer {
 
     public static void main(String[] args) throws IOException {
-        // Where to store indexes
         File dirToStoreIndex = new File("src/main/resources/IndexData");
 
-        for (File file : dirToStoreIndex.listFiles()) {
-            file.delete();
-        }
+        deleteOlderIndex(dirToStoreIndex);
 
         Directory directory = FSDirectory.open(dirToStoreIndex.toPath());
 
@@ -40,44 +37,55 @@ public class Indexer {
         IndexWriter indexWriter = new IndexWriter(directory, config);
 
         File dirToBeIndexed = new File("src/main/resources/DataToIndex");
-
-        File[] files = dirToBeIndexed.listFiles();
-
-        for (File f : files) {
-            if (!f.getName().contains("DS_Store")) {
-                System.out.println("Indexing file " + f.getCanonicalPath());
-                Map<String, String> attributes = new HashMap<String, String>();
-
-                try (Stream<String> stream = Files.lines(Paths.get(dirToBeIndexed + "/" + f.getName()))) {
-
-                    stream.forEach(item -> {
-                        attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
-                    });
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                Document document = new Document();
-
-                Field title = new StoredField("fileName", f.getName());
-                document.add(title);
-
-                Field body = new TextField("body", new FileReader(f));
-                document.add(body);
-
-                if (attributes.get("price").toLowerCase().equals("free")) {
-                    attributes.put("price", "0.0");
-                }
-                Field price = new DoublePoint("price", Double.valueOf(attributes.get("price")));
-                document.add(price);
-
-                indexWriter.addDocument(document);
-            }
-        }
-
+        indexFiles(dirToBeIndexed, indexWriter);
         indexWriter.close();
-
     }
 
+    private static void indexFiles(File file, IndexWriter indexWriter) throws IOException {
+        File[] files = file.listFiles();
+        for (File f : files) {
+            if (!f.getName().contains("DS_Store")) {
+                if (f.isDirectory()) {
+                    indexFiles(f, indexWriter);
+                } else {
+                    System.out.println("Indexing file " + f.getCanonicalPath());
+                    Map<String, String> attributes = new HashMap<String, String>();
+                    try (Stream<String> stream = Files.lines(Paths.get(file + "/" + f.getName()))) {
+
+                        stream.forEach(item -> {
+                            attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
+                        });
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Document document = new Document();
+
+                    Field title = new StoredField("fileName", f.getName());
+                    document.add(title);
+
+                    Field body = new TextField("body", new FileReader(f));
+                    document.add(body);
+
+                    if (attributes.get("price").toLowerCase().equals("free")) {
+                        attributes.put("price", "0.0");
+                    }
+                    Field price = new DoublePoint("price", Double.valueOf(attributes.get("price")));
+                    document.add(price);
+
+                    Field rating = new DoublePoint("rating", Double.valueOf(attributes.get("rating")));
+                    document.add(rating);
+
+                    indexWriter.addDocument(document);
+                }
+            }
+        }
+    }
+
+    private static void deleteOlderIndex(File dirToStoreIndex) {
+        for (File file : dirToStoreIndex.listFiles()) {
+            file.delete();
+        }
+    }
 }
