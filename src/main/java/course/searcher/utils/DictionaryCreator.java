@@ -35,20 +35,37 @@ public class DictionaryCreator {
                     Map<String, String> attributes = new HashMap<String, String>();
                     try (Stream<String> stream = Files.lines(Paths.get(file + "/" + f.getName()))) {
 
-                        stream.forEach(item -> {
-                            attributes.put(item.split(":")[0].trim().toLowerCase(),
-                                    item.split(":")[1].trim().toLowerCase());
+                        stream.limit(16).forEach(item -> {
+                           
+                            
+                            if (!item.isEmpty() && (!item.contains("Additional description"))) {
+
+//                              System.out.println(item.split(":")[0].trim().toLowerCase());
+//                              System.out.println(item.split(":")[1].trim().toLowerCase());
+//                              System.out.println(item.indexOf(":"));
+                              //System.out.println(item.substring(0, item.indexOf(":")));
+                              //System.out.println(item.substring(item.indexOf(":") + 2));
+                              attributes.put(item.substring(0, item.indexOf(":")).toLowerCase(), item.substring(item.indexOf(":") + 2));
+                              
+                          }
                         });
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    String[] fileWords = attributes.get("title").split("[\\s]+");
-                    for (int i = 0; i < fileWords.length; i++) {
-                        if (uniqueWords.add(fileWords[i])) {
-                            printWriter.println(fileWords[i]);
+                    if (attributes.get("title").contains(" ")) {
+                        String[] fileWords = attributes.get("title").split("[\\s]+");
+                        for (int i = 0; i < fileWords.length; i++) {
+                            if (uniqueWords.add(fileWords[i])) {
+                                printWriter.println(fileWords[i]);
+                            }
+                        }
+                    } else {
+                        if (uniqueWords.add(attributes.get("title"))) {
+                            printWriter.println(attributes.get("title"));
                         }
                     }
+              
 
                 }
             }

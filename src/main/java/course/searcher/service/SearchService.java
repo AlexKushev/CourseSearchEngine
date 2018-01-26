@@ -41,11 +41,13 @@ public class SearchService {
 
     @Autowired
     private SpellCheckService spellCheckerService;
+    private List<String> documentNames;
 
     public List<Course> search(String searchQuery, String isFreeSelected, String[] sources, String priceRange,
             String highRating) throws IOException, ParseException {
 
-        List<String> documentNames = new ArrayList<String>();
+        documentNames = new ArrayList<String>();
+
         File dirToStoreIndex = new File(getClass().getResource("/IndexData").getFile());
         Directory directory = FSDirectory.open(dirToStoreIndex.toPath());
 
@@ -53,8 +55,22 @@ public class SearchService {
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
 
-        Query query = generateQuery(searchQuery, isFreeSelected, sources, priceRange, highRating);
+        generateQuery(searchQuery, searcher, isFreeSelected, sources, priceRange, highRating, false);
 
+        // TopDocs topDocs = searcher.search(query, 1000);
+        //
+        // ScoreDoc[] hits = topDocs.scoreDocs;
+        // for (int i = 0; i < hits.length; i++) {
+        // int docId = hits[i].doc;
+        // Document document = searcher.doc(docId);
+        // String fileName = document.get("fileName");
+        // documentNames.add(fileName);
+        // }
+
+        return loadCoursesFromFiles(documentNames);
+    }
+
+    private int getHits(Query query, IndexSearcher searcher) throws IOException {
         TopDocs topDocs = searcher.search(query, 1000);
 
         ScoreDoc[] hits = topDocs.scoreDocs;
@@ -64,8 +80,7 @@ public class SearchService {
             String fileName = document.get("fileName");
             documentNames.add(fileName);
         }
-
-        return loadCoursesFromFiles(documentNames);
+        return hits.length;
     }
 
     public List<Course> loadCoursesFromFiles(List<String> documents) {
@@ -79,12 +94,27 @@ public class SearchService {
             Map<String, String> attributes = new HashMap<String, String>();
 
             try (Stream<String> stream = Files.lines(Paths.get(dataDirectory + "/" + document))) {
-                stream.forEach(item -> {
-                    attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
-                });
+                stream.limit(16).forEach(item -> {
+                    if (!item.isEmpty()
+                            && (!item.contains("Additional description") && (!item.contains("Description")))) {
 
-                Course course = new Course(attributes.get("source"), attributes.get("title"), attributes.get("price"),
-                        attributes.get("author"), attributes.get("length"), attributes.get("rating"));
+                        // System.out.println(item.split(":")[0].trim().toLowerCase());
+                        // System.out.println(item.split(":")[1].trim().toLowerCase());
+                        // System.out.println(item.indexOf(":"));
+                        // System.out.println(item.substring(0,
+                        // item.indexOf(":")));
+                        // System.out.println(item.substring(item.indexOf(":") +
+                        // 2));
+                        attributes.put(item.substring(0, item.indexOf(":")).toLowerCase(),
+                                item.substring(item.indexOf(":") + 2));
+
+                    }
+
+                });
+                Course course = new Course(attributes.get("provider"), attributes.get("title"), attributes.get("price"),
+                        attributes.get("instructor"), attributes.get("length"), attributes.get("rating"),
+                        attributes.get("language"), attributes.get("description"), attributes.get("url"),
+                        attributes.get("image"));
                 courses.add(course);
 
             } catch (IOException e) {
@@ -96,12 +126,13 @@ public class SearchService {
         return courses;
     }
 
-    private BooleanQuery generateQuery(String searchQuery, String isFree, String[] sources, String priceRange,
-            String highRating) {
+    private void generateQuery(String searchQuery, IndexSearcher searcher, String isFree, String[] sources,
+            String priceRange, String highRating, boolean test) throws IOException {
 
         BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
 
-        booleanQuieryBuilder.add(new BooleanClause(getSearchQueryQuery(searchQuery), Occur.MUST));
+        // booleanQuieryBuilder.add(new
+        // BooleanClause(getSearchQueryQuery(searchQuery), Occur.MUST));
 
         if (isFree != null) {
             TermQuery termQuery = new TermQuery(new Term("body", "free"));
@@ -134,7 +165,26 @@ public class SearchService {
             break;
         }
 
-        return booleanQuieryBuilder.build();
+        String[] queryWords = searchQuery.split("[\\s]+");
+        List<String> queryWordsList = Arrays.asList(queryWords);
+        if (queryWordsList.size() == 1) {
+            booleanQuieryBuilder.add(singleWordSearchQueryGenerator(searchQuery), Occur.MUST);
+            getHits(booleanQuieryBuilder.build(), searcher);
+        } else {
+            if (!test) {
+                booleanQuieryBuilder.add(multipleWordSearchQueryGenerator(queryWordsList), Occur.MUST);
+                if (getHits(booleanQuieryBuilder.build(), searcher) == 0) {
+                    generateQuery(searchQuery, searcher, isFree, sources, priceRange, highRating, true);
+                } else {
+                    System.out.println("noo need word separation");
+                }
+            } else {
+                System.out.println("word separation");
+                booleanQuieryBuilder.add(multipleWordSearchQueryBySeparatedWordsGenerator(queryWordsList), Occur.MUST);
+                getHits(booleanQuieryBuilder.build(), searcher);
+            }
+        }
+
     }
 
     private Query getDoublePointQuery(String field, double lowerValue, double maxValue) {
@@ -144,7 +194,7 @@ public class SearchService {
     private Query getSourceQuery(Set<String> sources) {
         BooleanQuery.Builder sourceBooleanQueryBuilder = new BooleanQuery.Builder();
         for (String source : sources) {
-            TermQuery sourceTermQuery = new TermQuery(new Term("source", source.toLowerCase()));
+            TermQuery sourceTermQuery = new TermQuery(new Term("provider", source.toLowerCase()));
             sourceBooleanQueryBuilder.add(new BooleanClause(sourceTermQuery, Occur.SHOULD));
         }
         return sourceBooleanQueryBuilder.build();
@@ -161,6 +211,8 @@ public class SearchService {
     }
 
     private Query singleWordSearchQueryGenerator(String searchQuery) {
+        System.out.println(searchQuery);
+        System.out.println(spellCheckerService.getFixedQueryWord(searchQuery.toLowerCase()));
         return new TermQuery(new Term("body", spellCheckerService.getFixedQueryWord(searchQuery.toLowerCase())));
     }
 
@@ -174,6 +226,18 @@ public class SearchService {
 
         phraseQueryBuilder.setSlop(5);
         return phraseQueryBuilder.build();
+    }
+
+    private Query multipleWordSearchQueryBySeparatedWordsGenerator(List<String> queryWordLis) {
+        BooleanQuery.Builder booleanBuilder = new BooleanQuery.Builder();
+        for (String word : queryWordLis) {
+            if (!Utils.stopWords.contains(word)) {
+                TermQuery wordTermQuery = new TermQuery(new Term("body", spellCheckerService.getFixedQueryWord(word)));
+                booleanBuilder.add(new BooleanClause(wordTermQuery, Occur.SHOULD));
+            }
+        }
+
+        return booleanBuilder.build();
     }
 
 }

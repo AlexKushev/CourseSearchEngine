@@ -19,11 +19,11 @@ public class DataGenerator {
         titles.add("JavaScript in Deep");
 
         List<String> prices = new ArrayList<String>();
-        prices.add("99.99");
-        prices.add("9.99");
-        prices.add("14.99");
-        prices.add("100.99");
-        prices.add("149.99");
+        prices.add("$99.99");
+        prices.add("$9.99");
+        prices.add("$14.99");
+        prices.add("$100.99");
+        prices.add("$149.99");
 
         List<String> providers = new ArrayList<String>();
         providers.add("Udemy");
@@ -57,14 +57,16 @@ public class DataGenerator {
         for (int i = 1; i <= 10; i++) {
             String fileName = "course" + i + ".txt";
             PrintWriter printWriter = new PrintWriter("src/main/resources/DataToIndex/" + fileName);
-            printWriter.println("Source : " + providers.get(random.nextInt(providers.size())));
+            printWriter.println("Provider : " + providers.get(random.nextInt(providers.size())));
             printWriter.println("Title : " + titles.get(random.nextInt(titles.size())));
             printWriter.println("Price : " + prices.get(random.nextInt(prices.size())));
-            printWriter.println("Author : " + authors.get(random.nextInt(authors.size())));
+            printWriter.println("Instructor : " + authors.get(random.nextInt(authors.size())));
             printWriter.println("Length : " + lengths.get(random.nextInt(lengths.size())));
             printWriter.println("Rating : " + ratings.get(random.nextInt(ratings.size())));
             printWriter.close();
         }
+        
+        System.out.println("Files created");
 
     }
     

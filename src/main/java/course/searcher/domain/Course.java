@@ -2,33 +2,58 @@ package course.searcher.domain;
 
 public class Course {
 
-    private String source;
+    private String provider;
     private String title;
     private String price;
-    private String author;
+    private String instructor;
     private String length;
     private String rating;
+    private String language;
+    private String description;
+    private String pageUrl;
+    private String imageUrl;
 
     public Course() {
 
     }
 
-    public Course(String source, String title, String price, String author, String length, String rating) {
+    public Course(String provider, String title, String price, String instructor, String length, String rating,
+            String language, String description, String pageUrl, String url) {
         super();
-        this.source = source;
+        this.provider = provider;
         this.title = title;
         this.price = price;
-        this.author = author;
+        this.instructor = instructor;
         this.length = length;
         this.rating = rating;
+        this.language = language;
+        this.description = description;
+        this.pageUrl = pageUrl;
+        this.imageUrl = url;
     }
 
-    public String getSource() {
-        return source;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPageUrl() {
+        return pageUrl;
+    }
+
+    public void setPageUrl(String pageUrl) {
+        this.pageUrl = pageUrl;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     public String getTitle() {
@@ -47,12 +72,12 @@ public class Course {
         this.price = price;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getInstructor() {
+        return instructor;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setInstructor(String instructor) {
+        this.instructor = instructor;
     }
 
     public String getLength() {
@@ -71,10 +96,26 @@ public class Course {
         this.rating = rating;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public String toString() {
-        return "Course [source=" + source + ", title=" + title + ", price=" + price + ", author=" + author + ", length="
-                + length + "]";
+        return "Course [source=" + provider + ", title=" + title + ", price=" + price + ", author=" + instructor
+                + ", length=" + length + "]";
     }
 
 }

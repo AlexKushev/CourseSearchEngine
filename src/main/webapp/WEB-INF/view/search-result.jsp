@@ -15,12 +15,17 @@
         <c:when test="${fn:length(list) gt 0}">
             <c:forEach items="${list}" var="course">
                 <div>
-                    Source : <c:out value="${course.source}"/>
+                    Provider : <c:out value="${course.provider}"/>
                     Title : <c:out value="${course.title}"/>
                     Price : <c:out value="${course.price}"/>
-                    Author : <c:out value="${course.author}"/>
+                    Instructor : <c:out value="${course.instructor}"/>
                     Length : <c:out value="${course.length}"/>
                     Rating : <c:out value="${course.rating}"/>
+                    Description : <c:out value="${course.description }"/>
+                    Language : <c:out value="${course.language}"/>
+                    <!-- Add button to click and redirect to url -->
+                    url : <c:out value="${course.pageUrl}"/>
+                    Image : <c:out value="${course.imageUrl}"/>
                 </div>
             </c:forEach>
         </c:when>
