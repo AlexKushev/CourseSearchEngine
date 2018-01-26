@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Utils {
 
-    private List<String> stopWords;
+    public static List<String> stopWords;
     private String[] testArray = { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
             "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but",
             "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't",

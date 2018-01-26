@@ -80,7 +80,7 @@ public class CourseSearchSpellChecker implements SpellCheckListener {
 
     public static void main(String[] args) {
         CourseSearchSpellChecker spellChecker = new CourseSearchSpellChecker();
-        String result = spellChecker.getCorrectedLine("javasript");
+        String result = spellChecker.getCorrectedLine("jva programing");
         System.out.println(result);
     }
 }

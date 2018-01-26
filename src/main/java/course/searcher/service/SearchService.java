@@ -73,7 +73,6 @@ public class SearchService {
             Map<String, String> attributes = new HashMap<String, String>();
 
             try (Stream<String> stream = Files.lines(Paths.get(dataDirectory + "/" + document))) {
-
                 stream.forEach(item -> {
                     attributes.put(item.split(":")[0].trim().toLowerCase(), item.split(":")[1].trim());
                 });
