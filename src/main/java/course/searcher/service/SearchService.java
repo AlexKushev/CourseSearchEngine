@@ -30,6 +30,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import course.searcher.domain.Course;
@@ -37,6 +38,9 @@ import course.searcher.utils.Utils;
 
 @Component
 public class SearchService {
+
+    @Autowired
+    private SpellCheckService spellCheckerService;
 
     public List<Course> search(String searchQuery, String isFreeSelected, String[] sources, String priceRange,
             String highRating) throws IOException, ParseException {
@@ -157,14 +161,14 @@ public class SearchService {
     }
 
     private Query singleWordSearchQueryGenerator(String searchQuery) {
-        return new TermQuery(new Term("body", searchQuery.toLowerCase()));
+        return new TermQuery(new Term("body", spellCheckerService.getFixedQueryWord(searchQuery.toLowerCase())));
     }
 
     private Query multipleWordSearchQueryGenerator(List<String> queryWordList) {
         PhraseQuery.Builder phraseQueryBuilder = new PhraseQuery.Builder();
         for (String word : queryWordList) {
             if (!Utils.stopWords.contains(word)) {
-                phraseQueryBuilder.add(new Term("body", word));
+                phraseQueryBuilder.add(new Term("body", spellCheckerService.getFixedQueryWord(word)));
             }
         }
 

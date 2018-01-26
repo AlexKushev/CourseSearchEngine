@@ -17,7 +17,9 @@ public class DictionaryCreator {
 
     public static void main(String[] args) throws IOException {
         File startFolder = new File("src/main/resources/DataToIndex");
-        PrintWriter printWriter = new PrintWriter("dictionary/dictionary.txt");
+        File dicFile = new File("src/main/resources/dictionary/dictionary.txt");
+        dicFile.delete();
+        PrintWriter printWriter = new PrintWriter(dicFile);
         extractWords(startFolder, printWriter);
         printWriter.close();
         System.out.println("Dictionary done");

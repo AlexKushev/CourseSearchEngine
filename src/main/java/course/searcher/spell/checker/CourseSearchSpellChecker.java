@@ -29,13 +29,7 @@ public class CourseSearchSpellChecker implements SpellCheckListener {
     }
 
     private void initialize() {
-        spellChecker = new SpellChecker(dictionaryHashMap);
-        spellChecker.addSpellCheckListener(this);
-    }
-
-    static {
-
-        File dict = new File("dictionary/dictionary.txt");
+        File dict = new File(getClass().getResource("/dictionary/dictionary.txt").getFile());
         try {
             dictionaryHashMap = new SpellDictionaryHashMap(dict);
         } catch (FileNotFoundException e) {
@@ -43,7 +37,11 @@ public class CourseSearchSpellChecker implements SpellCheckListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        spellChecker = new SpellChecker(dictionaryHashMap);
+        spellChecker.addSpellCheckListener(this);
     }
+
+
 
     public List<String> getMisspelledWords(String text) {
         StringWordTokenizer texTok = new StringWordTokenizer(text, new TeXWordFinder());
@@ -81,10 +79,4 @@ public class CourseSearchSpellChecker implements SpellCheckListener {
         misspelledWords.add(event.getInvalidWord());
     }
     
-
-    public static void main(String[] args) {
-        CourseSearchSpellChecker spellChecker = new CourseSearchSpellChecker();
-        String result = spellChecker.getCorrectedLine("jva programing");
-        System.out.println(result);
-    }
 }
