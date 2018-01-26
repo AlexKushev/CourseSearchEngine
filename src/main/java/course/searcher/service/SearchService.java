@@ -23,6 +23,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
@@ -32,6 +33,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.springframework.stereotype.Component;
 
 import course.searcher.domain.Course;
+import course.searcher.utils.Utils;
 
 @Component
 public class SearchService {
@@ -92,16 +94,16 @@ public class SearchService {
 
     private BooleanQuery generateQuery(String searchQuery, String isFree, String[] sources, String priceRange,
             String highRating) {
-        TermQuery searchQueryTerm = new TermQuery(new Term("body", searchQuery.toLowerCase()));
 
         BooleanQuery.Builder booleanQuieryBuilder = new BooleanQuery.Builder();
-        booleanQuieryBuilder.add(new BooleanClause(searchQueryTerm, Occur.MUST));
+
+        booleanQuieryBuilder.add(new BooleanClause(getSearchQueryQuery(searchQuery), Occur.MUST));
 
         if (isFree != null) {
             TermQuery termQuery = new TermQuery(new Term("body", "free"));
             booleanQuieryBuilder.add(new BooleanClause(termQuery, Occur.MUST));
         }
-        
+
         if (highRating != null) {
             booleanQuieryBuilder.add(getDoublePointQuery("rating", 4.0, 6), Occur.MUST);
         }
@@ -142,6 +144,32 @@ public class SearchService {
             sourceBooleanQueryBuilder.add(new BooleanClause(sourceTermQuery, Occur.SHOULD));
         }
         return sourceBooleanQueryBuilder.build();
+    }
+
+    private Query getSearchQueryQuery(String searchQuery) {
+        String[] queryWords = searchQuery.split("[\\s]+");
+        List<String> queryWordsList = Arrays.asList(queryWords);
+        if (queryWordsList.size() == 1) {
+            return singleWordSearchQueryGenerator(searchQuery);
+        } else {
+            return multipleWordSearchQueryGenerator(queryWordsList);
+        }
+    }
+
+    private Query singleWordSearchQueryGenerator(String searchQuery) {
+        return new TermQuery(new Term("body", searchQuery.toLowerCase()));
+    }
+
+    private Query multipleWordSearchQueryGenerator(List<String> queryWordList) {
+        PhraseQuery.Builder phraseQueryBuilder = new PhraseQuery.Builder();
+        for (String word : queryWordList) {
+            if (!Utils.stopWords.contains(word)) {
+                phraseQueryBuilder.add(new Term("body", word));
+            }
+        }
+
+        phraseQueryBuilder.setSlop(5);
+        return phraseQueryBuilder.build();
     }
 
 }

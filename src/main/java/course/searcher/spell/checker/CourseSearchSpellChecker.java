@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.swabunga.spell.engine.SpellDictionaryHashMap;
 import com.swabunga.spell.engine.Word;
 import com.swabunga.spell.event.SpellCheckEvent;
@@ -14,6 +16,7 @@ import com.swabunga.spell.event.SpellChecker;
 import com.swabunga.spell.event.StringWordTokenizer;
 import com.swabunga.spell.event.TeXWordFinder;
 
+@Component
 public class CourseSearchSpellChecker implements SpellCheckListener {
 
     private SpellChecker spellChecker;
@@ -77,6 +80,7 @@ public class CourseSearchSpellChecker implements SpellCheckListener {
         event.ignoreWord(true);
         misspelledWords.add(event.getInvalidWord());
     }
+    
 
     public static void main(String[] args) {
         CourseSearchSpellChecker spellChecker = new CourseSearchSpellChecker();

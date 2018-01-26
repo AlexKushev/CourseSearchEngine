@@ -65,7 +65,7 @@ public class Indexer {
 
                     Field title = new StoredField("fileName", f.getName());
                     document.add(title);
-                    
+
                     Field source = new TextField("source", attributes.get("source"), Store.YES);
                     document.add(source);
 
