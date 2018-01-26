@@ -2,5 +2,5 @@ TO DO List
 
 1. Make it work with more than one word in search query
 2. Cammonly accepted synonyms (js -> javascript) 
-3. Spell checker (Dictionary can be generated from .txt files)
+3. Spell checker (Dictionary can be generated from .txt files) - Dictionary creation DONE
 4. Different currency 
